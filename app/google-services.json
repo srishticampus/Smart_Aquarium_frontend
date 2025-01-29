@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "1009394391060",
+    "project_id": "aquacare-63a47",
+    "firebase_url": "https://aquacare-63a47-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    "storage_bucket": "aquacare-63a47.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009394391060:android:f9940efe2c8267c712ef01",
+        "android_client_info": {
+          "package_name": "com.project.aquafarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUYefiQ5lTb8TM4LHACiAc_UVi_seSpbI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
