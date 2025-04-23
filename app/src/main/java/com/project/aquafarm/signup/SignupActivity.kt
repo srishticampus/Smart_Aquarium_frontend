@@ -278,6 +278,7 @@ class SignupActivity : AppCompatActivity(), View.OnClickListener {
                 showHidePassWord(v)
             }
 
+
             R.id.hideConfirmPassword -> {
                 hideConfirmPassword(v)
             }

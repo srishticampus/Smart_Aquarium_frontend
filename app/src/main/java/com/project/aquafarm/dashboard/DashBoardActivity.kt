@@ -10,6 +10,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
@@ -34,6 +35,7 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var database: DatabaseReference
 
     private val previousValues = mutableMapOf<String, String>()
+    private var lastWaterPumpState: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +82,10 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
+        binding.feedingSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val state = if (isChecked) "on" else "off"
+            updateSwitchState("feedingSwitch", state)
+        }
         binding.suggestionBtn.setOnClickListener(this)
     }
 
@@ -89,28 +95,70 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
         database.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 try {
-                    val ph_value = snapshot.child("Sensor/phLevel").value.toString()
-                    val water_level = snapshot.child("Sensor/distance").value.toString()
-                    val ambience_light = snapshot.child("Sensor/light").value.toString()
+                    val phValue = snapshot.child("Sensor/phLevel").value.toString()
+                    val waterLevel = snapshot.child("Sensor/distance").value.toString()
+                    val ambienceLight = snapshot.child("Sensor/light").value.toString()
                     val temperature = snapshot.child("Sensor/temperature").value.toString()
                     val oxygen = snapshot.child("Sensor/humidity").value.toString()
-
+                    val waterPumpState = snapshot.child("settings/waterPump").value.toString()
                     val currentDate =
                         SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
                     val currentTime = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-
-                    binding.phValue.text = ph_value
                     binding.tempValue.text = temperature
+
+                    val isCurrentlyOn = waterPumpState == "on"
+                    // Auto water pump logic
+                    when {
+                        waterLevel > 8.toString() && !isCurrentlyOn -> {
+                            updateSwitchState("waterPump", "on")
+                            showWaterPumpAlert(
+                                "Water Pump ON",
+                                "Water level is high. Pump is turned ON."
+                            )
+                        }
+
+                        waterLevel < 5.toString() && isCurrentlyOn -> {
+                            updateSwitchState("waterPump", "off")
+                            showWaterPumpAlert(
+                                "Water Pump OFF",
+                                "Water level is low. Pump is turned OFF."
+                            )
+                        }
+                    }
+                    when {
+                        phValue < 6.5.toString() -> {
+                            showPhAlert(
+                                "Low pH Alert",
+                                "pH level is too low ($phValue). Consider adding alkaline solutions."
+                            )
+                        }
+
+                        phValue > 8.5.toString() -> {
+                            showPhAlert(
+                                "High pH Alert",
+                                "pH level is too high ($phValue). Consider adding acidic solutions."
+                            )
+                        }
+                    }
+                    updateProgressBarWithValue(
+                        "phLevel", phValue,
+                        binding.progressPH,
+                        binding.phValue
+                    )
+                    updateProgressBarWithValue(
+                        "temperature",
+                        temperature, binding.progressTemp, binding.tempValue
+                    )
 
                     updateProgressBarWithValue(
                         "waterLevel",
-                        water_level,
+                        waterLevel,
                         binding.progressWater,
                         binding.waterValue
                     )
                     updateProgressBarWithValue(
                         "light",
-                        ambience_light,
+                        ambienceLight,
                         binding.progressLight,
                         binding.lightValue
                     )
@@ -122,19 +170,19 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
                     )
 
                     if (shouldSendData(
-                            ph_value,
+                            phValue,
                             temperature,
-                            ambience_light,
+                            ambienceLight,
                             oxygen,
-                            water_level
+                            waterLevel
                         )
                     ) {
                         sendDataToPhpServer(
-                            ph_value,
+                            phValue,
                             temperature,
-                            ambience_light,
+                            ambienceLight,
                             oxygen,
-                            water_level,
+                            waterLevel,
                             currentDate,
                             currentTime
                         )
@@ -216,25 +264,40 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun updateProgressBarWithValue(
         key: String,
-        value: String,
+        value: String?,
         progressBar: ProgressBar,
         textView: TextView
     ) {
-        if (previousValues[key] != value) {
-            previousValues[key] = value
-
-            val numericValue = value.toIntOrNull() ?: 0
-            progressBar.progress = numericValue
-            textView.text = value
-
-            val textColor: Int = when {
-                numericValue < 50 -> ContextCompat.getColor(this, R.color.color_low)
-                numericValue in 50..80 -> ContextCompat.getColor(this, R.color.color_normal)
-                else -> ContextCompat.getColor(this, R.color.color_high)
-            }
-
-            textView.setTextColor(textColor)
+        if (value.isNullOrBlank() || value == "N/A") {
+            return // Ignore invalid values
         }
+
+        val numericValue = value.toFloatOrNull() ?: 0f
+        when (progressBar.id) {
+            R.id.progressTemp -> progressBar.max = 100
+            R.id.progressWater -> progressBar.max = 100
+            R.id.progressPH -> progressBar.max = 14
+        }
+        val normalizedValue = when (progressBar.id) {
+            R.id.progressTemp -> (numericValue / 100 * progressBar.max).toInt()
+            R.id.progressWater -> (numericValue / 20 * progressBar.max).toInt()
+            else -> numericValue.toInt()
+        }
+
+        ObjectAnimator.ofInt(progressBar, "progress", normalizedValue).apply {
+            duration = 500
+            start()
+        }
+
+        textView.text = value
+
+        val textColor: Int = when {
+            normalizedValue < 30 -> ContextCompat.getColor(this, R.color.color_low)
+            normalizedValue in 30..70 -> ContextCompat.getColor(this, R.color.color_normal)
+            else -> ContextCompat.getColor(this, R.color.color_high)
+        }
+
+        textView.setTextColor(textColor)
     }
 
     private fun updateSwitchState(switch: String, state: String) {
@@ -286,4 +349,24 @@ class DashBoardActivity : AppCompatActivity(), View.OnClickListener {
         startActivity(intent)
     }
 
+    private fun showWaterPumpAlert(title: String, message: String) {
+        if (lastWaterPumpState != title) {  // Show only if the state changed
+            runOnUiThread {
+                AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                    .show()
+            }
+            lastWaterPumpState = title // Update the last state to avoid duplicate alerts
+        }
+    }
+
+    private fun showPhAlert(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
 }

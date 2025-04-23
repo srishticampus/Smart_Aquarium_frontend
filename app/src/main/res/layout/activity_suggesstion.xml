@@ -22,7 +22,9 @@
             android:layout_marginTop="30dp"
             android:contentDescription="@null"
             android:src="@drawable/back"
+            android:layout_marginBottom="10dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -32,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Fish Suggestions Based on pH Levels"
+        android:text="Fish Suggestions Based on Current Values"
         android:textColor="@color/blue"
         android:textSize="18sp"
         android:textStyle="bold"

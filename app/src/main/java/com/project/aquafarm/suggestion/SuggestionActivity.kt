@@ -2,57 +2,99 @@ package com.project.aquafarm.suggestion
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.project.aquafarm.R
+import com.google.firebase.database.FirebaseDatabase
+import com.project.aquafarm.api.ApiUtilities
 import com.project.aquafarm.dashboard.DashBoardActivity
 import com.project.aquafarm.databinding.ActivitySuggesstionBinding
-import com.project.aquafarm.suggestion.model.SuggestionItem
+import com.project.aquafarm.suggestion.model.Suggestion
+import kotlinx.coroutines.launch
 
 class SuggestionActivity : AppCompatActivity() {
-    lateinit var binding: ActivitySuggesstionBinding
+
+    private lateinit var binding: ActivitySuggesstionBinding
+    private lateinit var suggestionAdapter: SuggestionAdapter
+    private val suggestionList = mutableListOf<Suggestion>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivitySuggesstionBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_suggesstion)
+        setContentView(binding.root)
 
-        val recyclerView = findViewById<RecyclerView>(R.id.suggestionRecyclerView)
-
-        // Sample data for suggestions
-        val suggestionList = listOf(
-            SuggestionItem("2.0 - 4.0", "Goldfish, Catfish"),
-            SuggestionItem("4.0 - 6.5", "Tetras, Guppies"),
-            SuggestionItem("6.5 - 8.5", "Tilapia, Bass"),
-            SuggestionItem("8.5 - 10.0", "Cichlids, Mollies"),
-            SuggestionItem("5.0 - 6.0", "Discus, Neon Tetras"),
-            SuggestionItem("6.0 - 7.0", "Angelfish, Gouramis"),
-            SuggestionItem("7.0 - 7.5", "Barbs, Swordtails"),
-            SuggestionItem("7.5 - 8.0", "Rainbowfish, Zebra Danios"),
-            SuggestionItem("8.0 - 8.5", "Lake Malawi Cichlids, Platies"),
-            SuggestionItem("4.5 - 5.5", "Cardinal Tetras, Apistogramma"),
-            SuggestionItem("5.5 - 6.5", "Pearl Gouramis, Kuhli Loaches"),
-            SuggestionItem("7.5 - 9.0", "African Cichlids, Silver Dollars"),
-            SuggestionItem("6.0 - 7.5", "Kribensis, Bolivian Rams"),
-            SuggestionItem("8.0 - 9.0", "Mexican Mollies, Livebearers"),
-            SuggestionItem("7.0 - 8.0", "Guppies, Endlers")
-        )
-
-        val adapter = SuggestionAdapter(suggestionList)
-        recyclerView.layoutManager = GridLayoutManager(this, 1) // 1 row per item
-        recyclerView.adapter = adapter
+        setupRecyclerView()
+        fetchSensorData()
 
         binding.arrowLeft.setOnClickListener {
-
-            val intent = Intent(this@SuggestionActivity, DashBoardActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, DashBoardActivity::class.java))
             finish()
         }
+    }
 
+    /**
+     * Set up RecyclerView with empty list initially
+     */
+    private fun setupRecyclerView() {
+        suggestionAdapter = SuggestionAdapter(suggestionList)
+        binding.suggestionRecyclerView.apply {
+            layoutManager = GridLayoutManager(this@SuggestionActivity, 2)
+            adapter = suggestionAdapter
+        }
+    }
+
+    /**
+     * Fetch latest sensor data from Firebase
+     */
+    private fun fetchSensorData() {
+        val database = FirebaseDatabase.getInstance()
+        val sensorRef = database.getReference("sensors")
+
+        sensorRef.get().addOnSuccessListener { snapshot ->
+            val oxygen = snapshot.child("oxygen").getValue(String::class.java) ?: "0"
+            val ph = snapshot.child("ph").getValue(String::class.java) ?: "0"
+            val temperature = snapshot.child("temperature").getValue(String::class.java) ?: "0"
+
+            getSuggestionsFromAPI(oxygen, ph, temperature)
+
+        }.addOnFailureListener {
+            Toast.makeText(this, "Failed to fetch sensor data", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Call API to get fish/plant suggestions based on sensor data
+     */
+    private fun getSuggestionsFromAPI(oxygen: String, ph: String, temperature: String) {
+        lifecycleScope.launch {
+            try {
+                val response = ApiUtilities.getInstance().getSuggestions(oxygen, ph, temperature)
+                if (response.isSuccessful && response.body() != null) {
+                    val newSuggestions = response.body()?.suggestions ?: emptyList()
+                    updateRecyclerView(newSuggestions)
+                } else {
+                    Toast.makeText(
+                        this@SuggestionActivity,
+                        "Failed to get suggestions",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@SuggestionActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+    }
+
+    /**
+     * Update RecyclerView when new data arrives
+     */
+    private fun updateRecyclerView(newSuggestions: List<Suggestion>) {
+        suggestionList.clear()
+        suggestionList.addAll(newSuggestions)
+        suggestionAdapter.notifyDataSetChanged()
     }
 }

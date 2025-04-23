@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="@drawable/gradient_bg">
+    android:background="@drawable/gradient_bg"
+    android:fitsSystemWindows="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLyt"
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="30dp"
             android:layout_marginTop="20dp"
-            android:text="Current Conditions"
+            android:text="@string/current_conditions"
             android:textColor="@color/blue"
             android:textSize="28sp"
             app:layout_constraintStart_toStartOf="parent"
@@ -50,11 +50,10 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"> <!-- Changed from 0dp to wrap_content -->
-            <!-- Row 1: pH Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardPH"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="140dp"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
@@ -68,46 +67,83 @@
                     android:background="@drawable/card_bg"
                     android:orientation="vertical"
                     android:padding="12dp">
+
                     <!-- Heading -->
                     <TextView
                         android:id="@+id/phHeading"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ix_thermometer"
-                        android:drawablePadding="5dp"
-                        android:text="pH"
+                        android:text="pH Level"
                         android:textColor="@color/white"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:drawablePadding="5dp"
+                        app:drawableStartCompat="@drawable/ph_drop" />
+
                     <!-- Separator Line -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="2dp"
                         android:layout_marginTop="5dp"
                         android:background="@color/white" />
-                    <!-- First TextView: Label -->
-                    <TextView
-                        android:id="@+id/phTv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="pH Value :"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
-                    <!-- Second TextView: Value -->
+
+                    <!-- pH Level Value -->
                     <TextView
                         android:id="@+id/phValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="0.83547"
+                        android:layout_marginTop="10dp"
+                        android:text="7.0"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                </LinearLayout>
+                    <!-- Labels and ProgressBar -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp">
 
+                        <TextView
+                            android:id="@+id/lowLabelPH"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/low"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/normalLabelPH"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:text="@string/normal"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/highLabelPH"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/high"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <ProgressBar
+                            android:id="@+id/progressPH"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:layout_marginTop="20dp"
+                            android:max="100"
+                            android:progress="50"
+                            android:progressDrawable="@drawable/progress_bar_green" />
+                    </RelativeLayout>
+                </LinearLayout>
             </androidx.cardview.widget.CardView>
+
             <!-- Row 1: Oxygen Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardOxygen"
@@ -130,13 +166,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/oxygen"
                         android:drawablePadding="5dp"
                         android:padding="5dp"
-                        android:text="Oxygen"
+                        android:text="@string/oxygen"
                         android:textColor="@color/white"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:drawableStartCompat="@drawable/oxygen" />
                     <!-- Separator Line -->
                     <View
                         android:id="@+id/seperateLineO2"
@@ -150,7 +186,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
-                        android:text="Oxygen :"
+                        android:text="@string/oxygen"
                         android:textColor="@color/white"
                         android:textSize="14sp" />
                     <!-- Oxygen Value -->
@@ -159,7 +195,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Normal"
+                        android:text="@string/normal"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
@@ -175,7 +211,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_marginBottom="5dp"
-                            android:text="low"
+                            android:text="@string/low"
                             android:textColor="@color/white"
                             android:textSize="14sp" />
                         <!-- Normal Label -->
@@ -185,7 +221,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerHorizontal="true"
                             android:layout_marginBottom="5dp"
-                            android:text="normal"
+                            android:text="@string/normal_value"
                             android:textColor="@color/white"
                             android:textSize="14sp" />
                         <!-- High Label -->
@@ -195,7 +231,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_marginBottom="5dp"
-                            android:text="high"
+                            android:text="@string/high"
                             android:textColor="@color/white"
                             android:textSize="14sp" />
                         <!-- ProgressBar -->
@@ -218,7 +254,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardTemp"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="140dp"
                 android:layout_margin="8dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="4dp"
@@ -233,45 +269,82 @@
                     android:orientation="vertical"
                     android:padding="12dp">
 
+                    <!-- Heading -->
                     <TextView
+                        android:id="@+id/tempHeading"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:drawableStart="@drawable/ix_thermometer"
-                        android:drawablePadding="5dp"
-                        android:text="Temp"
+                        android:text="Temperature"
                         android:textColor="@color/white"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:drawableStartCompat="@drawable/ix_thermometer" />
 
+                    <!-- Separator Line -->
                     <View
                         android:id="@+id/seperateLineTemp"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="2dp"
                         android:layout_marginTop="5dp"
                         android:background="@color/white" />
 
-                    <TextView
-                        android:id="@+id/tempTv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:text="Temperature :"
-                        android:textColor="@color/white"
-                        android:textSize="14sp" />
-
+                    <!-- Temperature Value -->
                     <TextView
                         android:id="@+id/tempValue"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="5dp"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="30°C"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold" />
-                </LinearLayout>
 
+                    <!-- Labels and ProgressBar -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp">
+
+                        <TextView
+                            android:id="@+id/lowLabelTemp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/low"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/normalLabelTemp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:text="Normal"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/highLabelTemp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/high"
+                            android:textColor="@color/white"
+                            android:textSize="14sp" />
+
+                        <ProgressBar
+                            android:id="@+id/progressTemp"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:layout_marginTop="20dp"
+                            android:max="100"
+                            android:progress="60"
+                            android:progressDrawable="@drawable/progress_bar_green" />
+                    </RelativeLayout>
+                </LinearLayout>
             </androidx.cardview.widget.CardView>
+
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardWater"
@@ -531,6 +604,18 @@
                 app:layout_constraintStart_toStartOf="@id/controlsHeader"
                 app:layout_constraintTop_toBottomOf="@id/autoControlSwitch" />
 
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/feedingSwitch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="Fish Feeding"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/controlsHeader"
+                app:layout_constraintTop_toBottomOf="@id/waterPumpSwitch" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/analysisBtn"
                 android:layout_width="match_parent"
@@ -542,7 +627,7 @@
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/waterPumpSwitch" />
+                app:layout_constraintTop_toBottomOf="@id/feedingSwitch" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/suggestionBtn"

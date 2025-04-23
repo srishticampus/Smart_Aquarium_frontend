@@ -10,6 +10,7 @@ import com.project.aquafarm.login.LoginResponse
 import com.project.aquafarm.profile.model.ProfileUpdateResponse
 import com.project.aquafarm.resetpassword.ResetPasswordResponse
 import com.project.aquafarm.signup.SignupResponse
+import com.project.aquafarm.suggestion.model.SuggestionItem
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -87,5 +88,13 @@ interface APIInterface {
     suspend fun getAnalysisDataByDate(
         @Field("date") date: String
     ): Response<DateBasedValuesResponse>
+
+    @FormUrlEncoded
+    @POST("fish_suggestions.php")
+    suspend fun getSuggestions(
+        @Field("oxygen") oxygen: String,
+        @Field("ph") ph: String,
+        @Field("temperature") temperature: String
+    ): Response<SuggestionItem>
 
 }

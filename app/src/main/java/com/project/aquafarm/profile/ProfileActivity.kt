@@ -1,7 +1,6 @@
 package com.project.aquafarm.profile
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
@@ -26,9 +25,6 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var firstNameEt: TextView
     private lateinit var phoneEt: TextView
     private lateinit var emailEt: TextView
-
-    //  private lateinit var profileImage: ImageView
-    var imageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,21 +87,21 @@ class ProfileActivity : AppCompatActivity() {
 
     }
 
-    fun viewProfile(userId: String) {
+    private fun viewProfile(userId: String) {
 
         try {
             CoroutineScope(Dispatchers.IO).launch {
                 val api = ApiUtilities.getInstance()
                 val result = api.viewProfile(userId)
                 withContext(Dispatchers.Main) {
-                    result.body()?.let { root ->
+                        result.body()?.let { root ->
                         if (root.status == true) {
                             val fullName =
                                 "${root.userData[0].first_name} ${root.userData[0].last_name}"
                             firstNameEt.text = fullName
 
-                            emailEt.setText(root.userData[0].email)
-                            phoneEt.setText(root.userData[0].phone)
+                            emailEt.text = root.userData[0].email
+                            phoneEt.text = root.userData[0].phone
 
                             // profileImage.setImageResource(root.userData[0].photo)
                             // passwordEt.setText(root.userData[0].p)
@@ -121,53 +117,4 @@ class ProfileActivity : AppCompatActivity() {
 
         }
     }
-
-
-//    fun updateProfile(userId: String) {
-//
-//        CoroutineScope(Dispatchers.IO).launch {
-//            val filesDir = applicationContext.filesDir
-//            val file = File(filesDir, "image.jpg")
-//            val inputStream =
-//                imageUri?.let { applicationContext.contentResolver.openInputStream(it) }
-//            val outputStream = FileOutputStream(file)
-//            inputStream?.copyTo(outputStream)
-//            val requestFile: RequestBody =
-//                file.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-//
-//            val multipartBody: MultipartBody.Part =
-//                MultipartBody.Part.createFormData("image", file.name, requestFile)
-//
-//            val userId = RequestBody.create(MultipartBody.FORM, userId)
-//            val firstname = RequestBody.create(MultipartBody.FORM, firstNameEt.text.toString())
-//            val lastname = RequestBody.create(MultipartBody.FORM, lastnameEt.text.toString())
-//            val email = RequestBody.create(MultipartBody.FORM, emailEt.text.toString())
-//            val phone = RequestBody.create(MultipartBody.FORM, phoneEt.text.toString())
-//
-//            val map = HashMap<String?, RequestBody?>()
-//            map["userid"] = userId
-//            map["first_name"] = firstname
-//            map["last_name"] = lastname
-//            map["phone"] = phone
-//            map["email"] = email
-//
-//            val response = ApiUtilities.getInstance().updateUserProfile(map, multipartBody)
-//            withContext(Dispatchers.Main) {
-//                if (response.isSuccessful) {
-//                    val result = response.body()
-//                    if (result != null) {
-//                        if (result.status == true) {
-//                            Toast.makeText(this@ProfileActivity, "Success", Toast.LENGTH_SHORT)
-//                                .show()
-//                        } else {
-//                            Toast.makeText(this@ProfileActivity, result.message, Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                    }
-//                } else {
-//                    Toast.makeText(this@ProfileActivity, "Failed", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        }
-//    }
 }
